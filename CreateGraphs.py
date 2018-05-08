@@ -1,6 +1,10 @@
 import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
+import matplotlib
 import pandas
 import numpy as np
+from datetime import datetime
+
 
 data = pandas.read_csv('enron.csv')
 data = data.drop(['to', 'from'], axis=1)
@@ -64,8 +68,32 @@ def plot_against_day():
     plt.show()
 
 
+def plot_hour_against_date():
+    plt.figure(figsize=(20, 20))
+    Xtemp = data[:, 0:3]
+    list_of_datetimes = []
+    T = data[:, 3]
+    Tname = names[3]
+    for x in Xtemp:
+        xString = np.array2string(x, precision=1, suppress_small=True)
+        xString = " ".join(xString.split()).replace("[", "").replace("]", "").lstrip()
+        list_of_datetimes.append(datetime.strptime(xString, "%d %m %Y"))
+
+    X = list_of_datetimes
+
+    plt.gcf().autofmt_xdate()
+    myFmt = mdates.DateFormatter("%d/%m/%Y")
+    plt.gca().xaxis.set_major_formatter(myFmt)
+
+    plt.plot(X, T, 'o', alpha=0.5)
+    plt.ylabel(Tname)
+    plt.xlabel("Date: d/m/y")
+    plt.show()
+
+
 if __name__ == '__main__':
-    plot_against_hour()
-    plot_against_year()
-    plot_against_month()
-    plot_against_day()
+    # plot_against_hour()
+    # plot_against_year()
+    # plot_against_month()
+    # plot_against_day()
+    plot_hour_against_date()
