@@ -1,5 +1,4 @@
 import pandas as pd
-import math
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import style
@@ -15,7 +14,6 @@ class k_Means:
     # constructor
     # initializes k
     # sets the tolerance (aka how far it can be from the centroid)
-    # setting this to 1 to represent 1 hour
     # sets max iterations for the main loop to be 500
     # initializes the centroids
     def __init__(self, k=5, tolerance=.0001, max_iterations=500):
@@ -54,28 +52,6 @@ class k_Means:
         distances = [np.linalg.norm(((features[0] - self.centroids[centroid][0]).days * 24) + (
                 (features[0] - self.centroids[centroid][0]).seconds / 3600.0)) for centroid in self.centroids]
         return distances
-
-    # computes the average date between all the dates
-    def dateTimeAverage(self, classification):
-
-        # sets the earliest date as the base
-        base = np.min(self.classes[classification])
-
-        # calculates the distance from the base to each of the dates in the class
-        # adds this distance to datesSum
-        datesSum = timedelta(0)
-        for i in range(len(self.classes[classification])):
-            datesSum += (self.classes[classification][i][0] - base)
-
-        # divides the sum by the number of dates given
-        averageDays = datesSum // timedelta(days=len(self.classes[classification]))
-        averageHours = int(round(((datesSum / timedelta(days=len(self.classes[classification]))) % 1), 5) * 24)
-
-        averageDate = base + timedelta(days=averageDays, hours=averageHours)
-        result = []
-        result.append(averageDate)
-
-        return np.array(result)
 
     # computes the average date between all the dates
     def dateTimeAverage2(self, chunk):
@@ -126,15 +102,10 @@ class k_Means:
             for features in data:
                 # uses helper method to calculate distance between two dates
                 distances = k.dateTimeDistance(features)
-                # commented out origional line below
-                # distances = [np.linalg.norm(features - self.centroids[centroid]) for centroid in self.centroids]
-
                 # grabs the index of the centroid that it is closest to, and assigns it to that class
                 # adds it to the list for that centroid in the classes dictionary
                 classification = distances.index(min(distances))
                 self.classes[classification].append(features)
-
-            print("checked distances")
 
             # holds the current centroids in previous to use later
             previous = dict(self.centroids)
@@ -143,20 +114,16 @@ class k_Means:
             for classification in self.classes:
                 # iterate through the classes list for each centroid and find the average of all the data points in the class
                 # assigns the average as the new centroid
-                # uses helper method to find the average of the dates
 
                 # break the self.classes[classification] up into 10 parts
                 chunksForAverage = list(k.chunks(self.classes[classification], 100))
 
+                # uses helper method to find the average of the dates
                 averages = []
                 for chunk in chunksForAverage:
                     averages.append(k.dateTimeAverage2(chunk))
 
                 self.centroids[classification] = k.dateTimeAverage2(averages)
-
-                # self.centroids[classification] = k.dateTimeAverage(classification)
-
-            print("computed new centroid")
 
             isOptimal = True
 
@@ -175,8 +142,6 @@ class k_Means:
             if isOptimal:
                 break
 
-            print("next iteration", i)
-
     def plot(self):
         colors = 10 * ["r", "g", "c", "b", "k"]
 
@@ -184,13 +149,11 @@ class k_Means:
             data = k.centroids[centroid]
             for point in data:
                 plt.scatter(date(point.year, point.month, point.day), point.hour, s=130, marker="x")
-            # plt.scatter(k.centroids[centroid], k.centroids[centroid], s=130, marker="x")
         for classification in k.classes:
             color = colors[classification]
             for features in k.classes[classification]:
                 for point in features:
                     plt.scatter(date(point.year, point.month, point.day), point.hour, color=color, s=30)
-                # plt.scatter(features, features, color=color, s=30)
         plt.show()
 
 
