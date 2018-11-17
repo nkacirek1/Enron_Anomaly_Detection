@@ -1,3 +1,3 @@
 # MachineLearningTP
 
-Check out the completed project [here](TermProject.ipynb).
+Check out the completed project write-up [here](TermProject.ipynb).
